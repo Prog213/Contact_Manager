@@ -1,0 +1,51 @@
+﻿@model List<Contact_Manager.Models.Contact>
+@{
+}
+
+<div class="container mt-3">
+    <h2>List of Contacts</h2>
+</div>
+
+<div class="container mt-3">
+    @if (Model != null && Model.Any())
+    {
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Date of birth</th>
+                    <th scope="col">Married</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Salary</th>
+                    <th scope="col">Operations</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var contact in Model)
+                {
+                    <tr>
+                        <td>@contact.Id</td>
+                        <td>@contact.Name</td>
+                        <td>@contact.DateOfBirth.ToShortDateString()</td>
+                        <td>@contact.Married</td>
+                        <td>@contact.Phone</td>
+                        <td>@contact.Salary</td>
+                        <td>
+                            <form asp-action="Delete" asp-controller="Contacts" asp-route-id="@contact.Id" method="post">
+                            <button type="submit" 
+                                class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            No Contacts found.
+        </div>
+    }
+</div>
