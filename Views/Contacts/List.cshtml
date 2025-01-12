@@ -105,12 +105,33 @@
                 const marriedCheckbox = row.querySelector('.married-checkbox');
                 const isMarried = marriedCheckbox.checked;
 
+                // Validation checks
+                const name = row.cells[1].textContent.trim();
+                const phone = row.cells[4].textContent.trim();
+                const salary = parseFloat(row.cells[5].textContent.trim());
+
+                // Validation checks
+                if (!name || !/^[A-Za-z\s]+$/.test(name)) {
+                    alert('Invalid Name. Please enter alphabetic characters only.');
+                    return;
+                }
+
+                if (!phone || !/^(\d{10}|\d{3}-\d{3}-\d{4})$/.test(phone)) {
+                    alert('Invalid Phone. Please enter a 10-digit phone number in either "1111111111" or "111-111-1111" format.');
+                    return;
+                }
+
+                if (isNaN(salary) || salary < 0 || salary > 100000) {
+                    alert('Invalid Salary. Please enter a value between 0 and 100,000.');
+                    return;
+                }
+
                 const updatedData = {
-                    name: row.cells[1].textContent.trim(),
+                    name: name,
                     dateOfBirth: row.querySelector('.date-input').value,
                     married: isMarried,
-                    phone: row.cells[4].textContent.trim(),
-                    salary: parseFloat(row.cells[5].textContent.trim())
+                    phone: phone,
+                    salary: salary
                 };
 
                 try {
