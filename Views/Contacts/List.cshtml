@@ -31,7 +31,10 @@
                             <span class="date-display">@contact.DateOfBirth.ToShortDateString()</span>
                             <input type="date" class="form-control date-input d-none" value="@contact.DateOfBirth.ToString("yyyy-MM-dd")" />
                         </td>
-                        <td contenteditable="false" class="editable">@contact.Married</td>
+                        <td>
+                            <input type="checkbox" class="form-check-input married-checkbox" disabled @(contact.Married ? "checked" : "") />
+                        </td>
+
                         <td contenteditable="false" class="editable">@contact.Phone</td>
                         <td contenteditable="false" class="editable">@contact.Salary.ToString("0.##")</td>
                         <td>
@@ -76,6 +79,9 @@
                     cell.contentEditable = true;
                     cell.classList.add('editing');
                 });
+                const marriedCheckbox = row.querySelector('.married-checkbox');
+                marriedCheckbox.disabled = false;
+
 
                 const dateDisplay = row.querySelector('.date-display');
                 const dateInput = row.querySelector('.date-input');
@@ -95,10 +101,14 @@
                 const editBtn = row.querySelector('.edit-btn');
 
                 const id = row.cells[0].textContent.trim();
+
+                const marriedCheckbox = row.querySelector('.married-checkbox');
+                const isMarried = marriedCheckbox.checked;
+
                 const updatedData = {
                     name: row.cells[1].textContent.trim(),
                     dateOfBirth: row.querySelector('.date-input').value,
-                    married: row.cells[3].textContent.trim() === 'true',
+                    married: isMarried,
                     phone: row.cells[4].textContent.trim(),
                     salary: parseFloat(row.cells[5].textContent.trim())
                 };
@@ -133,6 +143,7 @@
                 dateDisplay.textContent = formattedDate;
                 dateDisplay.classList.remove('d-none');
                 dateInput.classList.add('d-none');
+                marriedCheckbox.disabled = true;
 
                 editBtn.style.display = 'inline-block';
                 saveBtn.style.display = 'none';
