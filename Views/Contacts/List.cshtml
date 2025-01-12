@@ -26,16 +26,24 @@
                 {
                     <tr>
                         <td>@contact.Id</td>
-                        <td>@contact.Name</td>
-                        <td>@contact.DateOfBirth.ToShortDateString()</td>
-                        <td>@contact.Married</td>
-                        <td>@contact.Phone</td>
-                        <td>@contact.Salary</td>
+                        <td contenteditable="false" class="editable">@contact.Name</td>
                         <td>
-                            <form asp-action="Delete" asp-controller="Contacts" asp-route-id="@contact.Id" method="post">
-                            <button type="submit" 
-                                class="btn btn-danger btn-sm">Delete</button>
-                            </form>
+                            <span class="date-display">@contact.DateOfBirth.ToShortDateString()</span>
+                            <input type="date" class="form-control date-input d-none" value="@contact.DateOfBirth.ToString("yyyy-MM-dd")" />
+                        </td>
+                        <td contenteditable="false" class="editable">@contact.Married</td>
+                        <td contenteditable="false" class="editable">@contact.Phone</td>
+                        <td contenteditable="false" class="editable">@contact.Salary.ToString("0.##")</td>
+                        <td>
+                            <div class="d-inline">
+                                <button class="btn btn-primary btn-sm edit-btn">Edit</button>
+                                <button class="btn btn-success btn-sm save-btn" style="display:none;">Save</button>
+                                <form asp-action="Delete" class="d-inline" 
+                                    asp-controller="Contacts" asp-route-id="@contact.Id" method="post">
+                                    <button type="submit" 
+                                        class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -57,6 +65,81 @@
 
 @section Scripts {
     <script>
+        // Inline editing
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const row = this.closest('tr');
+                const saveBtn = row.querySelector('.save-btn');
+                const editBtn = row.querySelector('.edit-btn');
+
+                row.querySelectorAll('.editable').forEach(cell => {
+                    cell.contentEditable = true;
+                    cell.classList.add('editing');
+                });
+
+                const dateDisplay = row.querySelector('.date-display');
+                const dateInput = row.querySelector('.date-input');
+                dateDisplay.classList.add('d-none');
+                dateInput.classList.remove('d-none');
+
+                editBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-block';
+            });
+        });
+
+        //Saving changes
+        document.querySelectorAll('.save-btn').forEach(button => {
+            button.addEventListener('click', async function () {
+                const row = this.closest('tr');
+                const saveBtn = row.querySelector('.save-btn');
+                const editBtn = row.querySelector('.edit-btn');
+
+                const id = row.cells[0].textContent.trim();
+                const updatedData = {
+                    name: row.cells[1].textContent.trim(),
+                    dateOfBirth: row.querySelector('.date-input').value,
+                    married: row.cells[3].textContent.trim() === 'true',
+                    phone: row.cells[4].textContent.trim(),
+                    salary: parseFloat(row.cells[5].textContent.trim())
+                };
+
+                try {
+                    const response = await fetch(`/Contacts/Edit/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedData)
+                    });
+
+                    if (response.ok) {
+                        alert('Record updated successfully!');
+                    } else {
+                        alert('Failed to update the record.');
+                    }
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                }
+
+                row.querySelectorAll('.editable').forEach(cell => {
+                    cell.contentEditable = false;
+                    cell.classList.remove('editing');
+                });
+
+                const dateDisplay = row.querySelector('.date-display');
+                const dateInput = row.querySelector('.date-input');
+                const date = new Date(dateInput.value);
+                const formattedDate = `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}`;
+                dateDisplay.textContent = formattedDate;
+                dateDisplay.classList.remove('d-none');
+                dateInput.classList.add('d-none');
+
+                editBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+            });
+        });
+
+        // Sorting
         let sortDirection = {};
 
         function sortTable(columnIndex) {
@@ -88,6 +171,7 @@
             rows.forEach(row => tbody.appendChild(row));
         }
 
+        //File uploading
         const featuredUploadElement = document.getElementById('fileUpload');
         featuredUploadElement.addEventListener('change', async function (e) {
             const file = e.target.files[0];
@@ -104,7 +188,7 @@
             data.append('file', file);
 
             try {
-                const response = await fetch('/api/FileUpload', {
+                const response = await fetch(`/api/FileUpload`, {
                     method: 'POST',
                     body: data
                 });

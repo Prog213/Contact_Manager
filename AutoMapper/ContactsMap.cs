@@ -8,6 +8,7 @@ namespace Contact_Manager.AutoMapper
         public ContactsMap()
         {
             CreateMap<AddContact, Contact>();
+            CreateMap<UpdateContact, Contact>();
         }
     }
 }
